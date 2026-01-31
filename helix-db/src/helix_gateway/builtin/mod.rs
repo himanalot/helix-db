@@ -1,4 +1,5 @@
 pub mod all_nodes_and_edges;
+pub mod hard_delete_vectors;
 pub mod hnsw_diagnostics;
 pub mod hnsw_duplicate_check;
 pub mod node_by_id;

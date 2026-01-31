@@ -96,7 +96,7 @@ pub fn hnsw_duplicate_check_inner(input: HandlerInput) -> Result<protocol::Respo
                     let code = vector.properties
                         .as_ref()
                         .and_then(|props| props.get("code"))
-                        .map(|v| v.to_string())
+                        .map(|v| v.inner_stringify())
                         .unwrap_or_else(|| "unknown".to_string());
 
                     // Add to fingerprint map
