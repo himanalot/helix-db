@@ -1474,9 +1474,21 @@ fn analyze_return_expr<'a>(
                         let var_info = scope.get(id.inner().as_str());
                         let is_reused = var_info.is_some_and(|v| v.reference_count > 1);
                         let is_collection = var_info.is_some_and(|v| !v.is_single);
-                        let traversal = GeneratedTraversal {
-                            is_reused_variable: is_reused,
-                            ..Default::default()
+                        // Use projection info from VariableInfo if available (preserves has_object_step, object_fields, etc.)
+                        let traversal = if let Some(vi) = var_info {
+                            GeneratedTraversal {
+                                is_reused_variable: is_reused,
+                                has_object_step: vi.has_object_step,
+                                object_fields: vi.object_fields.clone(),
+                                field_name_mappings: vi.field_name_mappings.clone(),
+                                excluded_fields: vi.excluded_fields.clone(),
+                                ..Default::default()
+                            }
+                        } else {
+                            GeneratedTraversal {
+                                is_reused_variable: is_reused,
+                                ..Default::default()
+                            }
                         };
                         let struct_name_prefix = format!(
                             "{}{}",

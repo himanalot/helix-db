@@ -72,18 +72,21 @@ pub(crate) fn validate_statements<'a>(
                 infer_expr_type(ctx, &assign.value, scope, original_query, None, query);
 
             // Determine if the variable is single or collection based on type
-            let is_single = if let Some(GeneratedStatement::Traversal(ref tr)) = stmt {
+            let var_info = if let Some(GeneratedStatement::Traversal(ref tr)) = stmt {
                 // Check if should_collect is ToObj, or if the type is a single value
-                matches!(tr.should_collect, ShouldCollect::ToObj)
-                    || matches!(rhs_ty, Type::Node(_) | Type::Edge(_) | Type::Vector(_))
+                let is_single = matches!(tr.should_collect, ShouldCollect::ToObj)
+                    || matches!(rhs_ty, Type::Node(_) | Type::Edge(_) | Type::Vector(_));
+                // Use from_traversal to preserve projection info (has_object_step, object_fields, etc.)
+                VariableInfo::from_traversal(rhs_ty, is_single, tr)
             } else {
                 // Non-traversal: check if type is single
-                matches!(rhs_ty, Type::Node(_) | Type::Edge(_) | Type::Vector(_))
+                let is_single = matches!(rhs_ty, Type::Node(_) | Type::Edge(_) | Type::Vector(_));
+                VariableInfo::new(rhs_ty, is_single)
             };
 
             scope.insert(
                 assign.variable.as_str(),
-                VariableInfo::new(rhs_ty, is_single),
+                var_info,
             );
 
             stmt.as_ref()?;

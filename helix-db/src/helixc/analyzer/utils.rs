@@ -274,6 +274,11 @@ pub(super) struct VariableInfo {
     pub reference_count: usize,      // How many times this variable is referenced
     pub source_var: Option<String>,  // For closure parameters, the actual variable they refer to
     pub struct_name: Option<String>, // Track generated struct name for nested object types in FOR loops
+    // Projection info from source traversal (for respecting field selection in RETURN)
+    pub has_object_step: bool,
+    pub object_fields: Vec<String>,
+    pub field_name_mappings: std::collections::HashMap<String, String>,
+    pub excluded_fields: Vec<String>,
 }
 
 impl VariableInfo {
@@ -284,6 +289,10 @@ impl VariableInfo {
             reference_count: 0,
             source_var: None,
             struct_name: None,
+            has_object_step: false,
+            object_fields: Vec::new(),
+            field_name_mappings: std::collections::HashMap::new(),
+            excluded_fields: Vec::new(),
         }
     }
 
@@ -294,6 +303,10 @@ impl VariableInfo {
             reference_count: 0,
             source_var: Some(source_var),
             struct_name: None,
+            has_object_step: false,
+            object_fields: Vec::new(),
+            field_name_mappings: std::collections::HashMap::new(),
+            excluded_fields: Vec::new(),
         }
     }
 
@@ -304,6 +317,25 @@ impl VariableInfo {
             reference_count: 0,
             source_var: None,
             struct_name: Some(struct_name),
+            has_object_step: false,
+            object_fields: Vec::new(),
+            field_name_mappings: std::collections::HashMap::new(),
+            excluded_fields: Vec::new(),
+        }
+    }
+
+    /// Create from a traversal, copying projection info
+    pub fn from_traversal(ty: Type, is_single: bool, traversal: &crate::helixc::generator::traversal_steps::Traversal) -> Self {
+        Self {
+            ty,
+            is_single,
+            reference_count: 0,
+            source_var: None,
+            struct_name: None,
+            has_object_step: traversal.has_object_step,
+            object_fields: traversal.object_fields.clone(),
+            field_name_mappings: traversal.field_name_mappings.clone(),
+            excluded_fields: traversal.excluded_fields.clone(),
         }
     }
 
