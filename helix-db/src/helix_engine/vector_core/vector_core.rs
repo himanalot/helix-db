@@ -664,7 +664,7 @@ impl HNSW for VectorCore {
                 new_vec_copy.set_distance(new_vec_copy.distance_to(&e)?);
                 e_conns.push(new_vec_copy);
                 let e_new_conn = self
-                    .select_neighbors::<F>(txn, label, &query, e_conns, level, true, None, arena)?;
+                    .select_neighbors::<F>(txn, label, &e, e_conns, level, true, None, arena)?;
                 self.set_neighbours(txn, id, &e_new_conn, level)?;
             }
         }
@@ -746,7 +746,7 @@ impl HNSW for VectorCore {
                 vec_copy.set_distance(vec_copy.distance_to(&e)?);
                 e_conns.push(vec_copy);
                 let e_new_conn =
-                    self.select_neighbors::<F>(txn, label, vector, e_conns, level, true, None, arena)?;
+                    self.select_neighbors::<F>(txn, label, &e, e_conns, level, true, None, arena)?;
                 self.set_neighbours(txn, e.id, &e_new_conn, level)?;
             }
         }
